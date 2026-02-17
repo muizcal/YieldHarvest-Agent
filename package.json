@@ -1,0 +1,48 @@
+{
+  "name": "yieldharvest-agent",
+  "version": "1.0.0",
+  "description": "Autonomous AI agent for DeFi yield farming on BNB Chain",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:bsc": "hardhat run scripts/deploy.ts --network bsc",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network bscTestnet",
+    "verify": "hardhat verify --network bsc",
+    "agent:start": "cd agent && python core/agent.py",
+    "dashboard:dev": "cd dashboard && npm run dev",
+    "dashboard:build": "cd dashboard && npm run build",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,sol,json,md}\""
+  },
+  "keywords": [
+    "defi",
+    "yield-farming",
+    "ai-agent",
+    "bnb-chain",
+    "autonomous",
+    "openclaw"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "hardhat": "^2.19.4",
+    "prettier": "^3.1.1",
+    "prettier-plugin-solidity": "^1.2.0",
+    "typechain": "^8.3.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "@openzeppelin/contracts-upgradeable": "^5.0.1",
+    "axios": "^1.6.5",
+    "date-fns": "^3.0.6",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.9.2"
+  }
+}
