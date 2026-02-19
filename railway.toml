@@ -1,11 +1,17 @@
 [build]
 builder = "NIXPACKS"
-
-[build.nixpacks]
-pkgs = ["python310", "python310Packages.pip"]
+buildCommand = "pip install -r requirements.txt"
 
 [deploy]
 startCommand = "python3 api-server.py"
 healthcheckPath = "/api/stats"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
+
+[[services]]
+name = "api"
+startCommand = "python3 api-server.py"
+
+[[services]]
+name = "agent"
+startCommand = "python3 agent/core/agent.py"

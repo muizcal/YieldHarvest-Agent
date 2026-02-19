@@ -2,6 +2,30 @@
 
 An autonomous AI agent for yield farming on Binance Smart Chain. The system continuously scans DeFi protocols, evaluates opportunities based on risk and return metrics, and executes positions automatically.
 
+## Live Deployment
+
+**Dashboard:** [https://yieldharvest.vercel.app](https://yieldharvest.vercel.app)  
+**API Server:** [https://yieldharvest-agent-production.up.railway.app](https://yieldharvest-agent-production.up.railway.app)
+
+## Deployed Smart Contracts (BSC Mainnet)
+
+All contracts are verified and viewable on BscScan:
+
+- **YieldVaultManager:** [0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49](https://bscscan.com/address/0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49)
+- **SessionKeyManager:** [0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B](https://bscscan.com/address/0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B)
+- **DecisionLogger:** [0xe82347f28365333b6f6901E7b40c17099D556007](https://bscscan.com/address/0xe82347f28365333b6f6901E7b40c17099D556007)
+
+**Network:** Binance Smart Chain (BSC)  
+**Chain ID:** 56
+
+### Whitelisted DeFi Protocols
+
+The agent currently operates with these whitelisted protocols:
+
+- **PancakeSwap MasterChef:** [0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652](https://bscscan.com/address/0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652)
+- **Venus Comptroller:** [0xfD36E2c2a6789Db23113685031d7F16329158384](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
+- **Thena Router:** [0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109](https://bscscan.com/address/0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109)
+
 ## Overview
 
 YieldHarvest uses artificial intelligence to optimize yield farming strategies across multiple DeFi protocols on BSC. The agent operates autonomously, making data-driven decisions about where to allocate capital based on real-time market conditions.
@@ -168,14 +192,14 @@ npx hardhat verify --network bsc <CONTRACT_ADDRESS>
 ```
 yieldharvest/
 ├── agent/
-│   ├── core/           
-│   ├── engines/        
-│   ├── strategies/     
-│   └── utils/          
-├── contracts/          
-├── dashboard/          
-├── scripts/            
-└── tests/              
+│   ├── core/           # Main agent logic
+│   ├── engines/        # Discovery, evaluation, execution
+│   ├── strategies/     # Portfolio optimization, risk management
+│   └── utils/          # Blockchain client, logging
+├── contracts/          # Solidity smart contracts
+├── dashboard/          # Web interface
+├── scripts/            # Deployment and utility scripts
+└── tests/              # Test suite
 ```
 
 ## Performance
@@ -201,21 +225,41 @@ All metrics are logged on-chain and available via the dashboard.
 
 ## Deployment
 
-### Frontend (Vercel)
+### Current Production Deployment
 
-1. Connect repository to Vercel
-2. Set root directory to `dashboard`
-3. Deploy
+The system is deployed across multiple platforms:
 
-### Backend (Railway)
+**Frontend (Vercel):**
+- URL: https://yield-harvest-agent.vercel.app
+- Auto-deploys from GitHub main branch
+- Serves static dashboard
 
-1. Create new Railway project
-2. Connect repository
-3. Set start command: `python3 api-server.py`
-4. Add environment variables
+**Backend (Railway):**
+- URL: https://yieldharvest-agent-production.up.railway.app
+- Runs both API server and autonomous agent
+- Persistent storage for position tracking
+
+### Deploy Your Own Instance
+
+#### Frontend (Vercel)
+
+1. Fork this repository
+2. Connect to Vercel
+3. Set root directory to `dashboard`
+4. Add environment variable: `NEXT_PUBLIC_API_URL` (your Railway URL)
 5. Deploy
 
-### Agent (Self-hosted)
+#### Backend (Railway)
+
+1. Create new Railway project
+2. Connect your forked repository
+3. Railway will detect Python automatically
+4. Set environment variables (see .env.example)
+5. Deploy
+
+The system uses `railway.toml` for configuration and `start.sh` to run both services.
+
+### Local Development
 
 Run on a VPS or local machine with persistent connection:
 
@@ -227,11 +271,36 @@ sudo systemctl start yieldharvest-agent
 ## Limitations
 
 - Currently supports BSC only (Ethereum support planned)
-- Demo mode executes simulated positions (production mode requires additional setup)
+- **Demo mode:** Agent tracks positions locally without executing on-chain transactions to minimize gas costs during development
+- Production mode available with full on-chain execution capability
 - API rate limits may affect discovery frequency during high volatility
-- Gas costs on BSC are not included in yield calculations
+- Positions are simulated for demonstration purposes; real capital deployment requires additional configuration
+
+## Demo vs Production Mode
+
+**Current Deployment (Demo Mode):**
+- Agent scans real DeFi protocols via DeFiLlama API
+- Evaluates opportunities using actual market data
+- Makes autonomous decisions based on AI optimization
+- Tracks positions locally in JSON storage
+- No on-chain transactions (saves gas fees)
+- Perfect for testing and demonstration
+
+**Production Mode:**
+- All demo features plus:
+- Executes real on-chain transactions
+- Manages actual capital in smart contracts
+- Compounds positions automatically
+- Full session key authorization
+- Emergency withdrawal capabilities
+
+To enable production mode, update the ExecutionEngine to use actual contract calls instead of local tracking.
 
 
+
+## License
+
+MIT License - see LICENSE file for details
 
 ## Disclaimer
 
