@@ -137,6 +137,15 @@
             cursor: not-allowed;
         }
 
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--error);
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -211,6 +220,17 @@
             font-weight: 600;
         }
 
+        .network-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--accent1);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -252,15 +272,10 @@
             color: var(--accent1);
         }
 
-        .network-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: rgba(0, 255, 136, 0.1);
-            border-radius: 6px;
-            font-size: 12px;
-            color: var(--accent1);
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .message {
@@ -286,6 +301,83 @@
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid var(--accent2);
             color: var(--accent2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent1);
+        }
+
+        .balance-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 16px;
         }
 
         .loading {
@@ -319,6 +411,14 @@
             .header-content {
                 flex-direction: column;
                 gap: 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
             }
 
             table {
@@ -431,38 +531,92 @@
 
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Smart Contracts</h2>
+                <h2 class="card-title">Vault Actions</h2>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
-                <div>
-                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Vault Manager</p>
-                    <a href="https://bscscan.com/address/0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49" target="_blank" style="color: var(--accent2); text-decoration: none;">
-                        0x2bd1...4bA49
-                    </a>
-                </div>
-                <div>
-                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Session Key Manager</p>
-                    <a href="https://bscscan.com/address/0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B" target="_blank" style="color: var(--accent2); text-decoration: none;">
-                        0x24988...1F5B
-                    </a>
-                </div>
-                <div>
-                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Decision Logger</p>
-                    <a href="https://bscscan.com/address/0xe82347f28365333b6f6901E7b40c17099D556007" target="_blank" style="color: var(--accent2); text-decoration: none;">
-                        0xe8234...6007
-                    </a>
-                </div>
+            <div class="action-buttons">
+                <button onclick="openDepositModal()" id="depositBtn">
+                    Deposit to Vault
+                </button>
+                <button onclick="openWithdrawModal()" class="btn-danger" id="withdrawBtn">
+                    Emergency Withdraw
+                </button>
+                <button onclick="refreshData()" class="btn-secondary">
+                    Refresh Data
+                </button>
+                <button onclick="window.open('https://bscscan.com/address/' + (userAddress || '0x0'), '_blank')" class="btn-secondary">
+                    View on BscScan
+                </button>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Quick Actions</h2>
+                <h2 class="card-title">Smart Contracts</h2>
             </div>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button onclick="refreshData()">Refresh Data</button>
-                <button onclick="window.open('https://bscscan.com/address/' + (userAddress || '0x0'), '_blank')">View Wallet on BscScan</button>
-                <button onclick="window.open('https://yieldharvest-agent-production.up.railway.app/api/stats', '_blank')">View API Response</button>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Vault Manager</p>
+                    <a href="https://bscscan.com/address/0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49" target="_blank" style="color: var(--accent2); text-decoration: none; font-size: 14px;">
+                        0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49
+                    </a>
+                </div>
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Session Key Manager</p>
+                    <a href="https://bscscan.com/address/0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B" target="_blank" style="color: var(--accent2); text-decoration: none; font-size: 14px;">
+                        0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B
+                    </a>
+                </div>
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Decision Logger</p>
+                    <a href="https://bscscan.com/address/0xe82347f28365333b6f6901E7b40c17099D556007" target="_blank" style="color: var(--accent2); text-decoration: none; font-size: 14px;">
+                        0xe82347f28365333b6f6901E7b40c17099D556007
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Deposit BNB to Vault</h3>
+                <p style="color: var(--text-secondary); font-size: 14px;">Fund the vault for autonomous yield farming</p>
+            </div>
+            <div class="modal-body">
+                <div class="balance-info">
+                    <span style="color: var(--text-secondary);">Your Balance:</span>
+                    <span id="modalWalletBalance">0.0000 BNB</span>
+                </div>
+                <div class="input-group">
+                    <label>Amount (BNB)</label>
+                    <input type="number" id="depositAmount" placeholder="0.01" step="0.001" min="0.001">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDepositModal()">Cancel</button>
+                <button onclick="confirmDeposit()">Confirm Deposit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Emergency Withdraw</h3>
+                <p style="color: var(--error); font-size: 14px;">This will withdraw all funds from the vault</p>
+            </div>
+            <div class="modal-body">
+                <div class="balance-info">
+                    <span style="color: var(--text-secondary);">Vault Balance:</span>
+                    <span id="modalVaultBalance">0.0000 BNB</span>
+                </div>
+                <p style="margin-bottom: 16px;">Are you sure you want to perform an emergency withdrawal? This will withdraw all BNB from the vault contract to your wallet.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeWithdrawModal()">Cancel</button>
+                <button class="btn-danger" onclick="confirmWithdraw()">Confirm Withdraw</button>
             </div>
         </div>
     </div>
@@ -477,6 +631,7 @@
         let provider = null;
         let signer = null;
         let userAddress = null;
+        let vaultContract = null;
 
         const connectBtn = document.getElementById('connectBtn');
         const disconnectBtn = document.getElementById('disconnectBtn');
@@ -488,6 +643,10 @@
         const messageArea = document.getElementById('messageArea');
 
         const VAULT_ADDRESS = '0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49';
+        const VAULT_ABI = [
+            "function owner() view returns (address)",
+            "function emergencyWithdraw() external"
+        ];
 
         connectBtn.addEventListener('click', async () => {
             try {
@@ -503,6 +662,7 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 userAddress = accounts[0];
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
 
                 connectBtn.style.display = 'none';
                 disconnectBtn.style.display = 'inline-block';
@@ -522,6 +682,7 @@
             provider = null;
             signer = null;
             userAddress = null;
+            vaultContract = null;
 
             connectBtn.style.display = 'inline-block';
             disconnectBtn.style.display = 'none';
@@ -538,19 +699,18 @@
             }
 
             try {
-                // Get wallet balance (REAL)
                 const balance = await provider.getBalance(userAddress);
-                walletBalance.textContent = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+                const balanceFormatted = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+                walletBalance.textContent = balanceFormatted;
 
-                // Get vault balance (REAL)
                 const vBalance = await provider.getBalance(VAULT_ADDRESS);
-                vaultBalance.textContent = parseFloat(ethers.utils.formatEther(vBalance)).toFixed(4);
-                document.getElementById('metricVault').textContent = parseFloat(ethers.utils.formatEther(vBalance)).toFixed(4) + ' BNB';
+                const vBalanceFormatted = parseFloat(ethers.utils.formatEther(vBalance)).toFixed(4);
+                vaultBalance.textContent = vBalanceFormatted;
+                document.getElementById('metricVault').textContent = vBalanceFormatted + ' BNB';
 
                 networkStatus.textContent = 'ONLINE';
                 sessionKeyStatus.textContent = 'CONNECTED';
 
-                // Check agent backend
                 await checkAgentStatus();
 
             } catch (error) {
@@ -568,7 +728,8 @@
                     const data = await response.json();
                     agentStatus.textContent = 'ONLINE';
                     document.getElementById('metricAgent').textContent = 'Running';
-                    document.getElementById('metricOpps').textContent = 'Scanning';
+                    document.getElementById('metricOpps').textContent = data.active_positions > 0 ? 
+                        data.active_positions + ' Active' : 'Scanning';
                 } else {
                     agentStatus.textContent = 'OFFLINE';
                     document.getElementById('metricAgent').textContent = 'Offline';
@@ -578,6 +739,83 @@
                 agentStatus.textContent = 'OFFLINE';
                 document.getElementById('metricAgent').textContent = 'Offline';
                 document.getElementById('metricOpps').textContent = '--';
+            }
+        }
+
+        function openDepositModal() {
+            if (!provider) {
+                showMessage('Please connect your wallet first', 'error');
+                return;
+            }
+            document.getElementById('modalWalletBalance').textContent = walletBalance.textContent + ' BNB';
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('depositAmount').value = '';
+        }
+
+        function openWithdrawModal() {
+            if (!provider) {
+                showMessage('Please connect your wallet first', 'error');
+                return;
+            }
+            document.getElementById('modalVaultBalance').textContent = vaultBalance.textContent + ' BNB';
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        async function confirmDeposit() {
+            const amount = document.getElementById('depositAmount').value;
+            
+            if (!amount || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Sending transaction...', 'info');
+                
+                const tx = await signer.sendTransaction({
+                    to: VAULT_ADDRESS,
+                    value: ethers.utils.parseEther(amount)
+                });
+
+                showMessage('Transaction sent! Waiting for confirmation...', 'info');
+                await tx.wait();
+                
+                showMessage('Deposit successful!', 'success');
+                
+                closeDepositModal();
+                await loadAllData();
+
+            } catch (error) {
+                console.error('Deposit error:', error);
+                showMessage('Deposit failed: ' + error.message, 'error');
+            }
+        }
+
+        async function confirmWithdraw() {
+            try {
+                showMessage('Sending transaction...', 'info');
+                
+                const tx = await vaultContract.emergencyWithdraw();
+                
+                showMessage('Transaction sent! Waiting for confirmation...', 'info');
+                await tx.wait();
+                
+                showMessage('Withdrawal successful!', 'success');
+                
+                closeWithdrawModal();
+                await loadAllData();
+
+            } catch (error) {
+                console.error('Withdraw error:', error);
+                showMessage('Withdrawal failed: ' + error.message, 'error');
             }
         }
 
@@ -612,6 +850,7 @@
                         provider = new ethers.providers.Web3Provider(window.ethereum);
                         signer = provider.getSigner();
                         userAddress = accounts[0];
+                        vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
                         
                         connectBtn.style.display = 'none';
                         disconnectBtn.style.display = 'inline-block';
