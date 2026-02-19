@@ -1,8 +1,7 @@
-[phases.setup]
-nixPkgs = ["python311"]
+providers = ["python"]
 
 [phases.install]
-cmds = ["python3 -m ensurepip --upgrade", "python3 -m pip install --upgrade pip", "python3 -m pip install -r requirements.txt"]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
 
 [start]
-cmd = "bash start.sh"
+cmd = "./start.sh"

@@ -1,28 +1,11 @@
-[phases.setup]
-nixPkgs = ["python311"]
-
-[phases.install]
-cmds = [
-  "python3 -m pip install -r requirements.txt"
-]
-
-[start]
-cmd = "bash start.sh"
-
 [build]
 builder = "NIXPACKS"
-buildCommand = "python3 -m pip install -r requirements.txt"
 
-[deploy]
-startCommand = "bash start.sh"
-healthcheckPath = "/api/stats"
-healthcheckTimeout = 300
-restartPolicyType = "ON_FAILURE"
+[build.nixpacks]
+pkgs = ["python311", "python311Packages.pip"]
 
-[[services]]
-name = "api"
-startCommand = "python3 api-server.py"
+[phases.install]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
 
-[[services]]
-name = "agent"
-startCommand = "python3 agent/core/agent.py"
+[start]
+cmd = "./start.sh"
