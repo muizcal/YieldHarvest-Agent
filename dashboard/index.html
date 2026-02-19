@@ -176,6 +176,19 @@
             color: var(--text-secondary);
         }
 
+        .explorer-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: var(--accent2);
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.2s;
+        }
+
+        .explorer-link:hover {
+            color: var(--accent1);
+        }
+
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -422,39 +435,47 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Vault Balance</div>
-                <div class="stat-value" id="vaultBalance">0.0000</div>
-                <div class="stat-unit">BNB · Live from chain</div>
+                <div class="stat-label">Wallet Balance</div>
+                <div class="stat-value" id="walletBalance">0.0000</div>
+                <div class="stat-unit">BNB · Your wallet</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Deposited</div>
-                <div class="stat-value" id="totalDeposited">0.0</div>
-                <div class="stat-unit">BNB · From contract</div>
+                <div class="stat-label">Agent Tracking</div>
+                <div class="stat-value" id="agentPositions">0</div>
+                <div class="stat-unit">Positions from agent</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Yield Earned</div>
-                <div class="stat-value" id="yieldEarned">0.0</div>
-                <div class="stat-unit">BNB · Actual profit</div>
+                <div class="stat-label">Total Value</div>
+                <div class="stat-value" id="totalValue">0.0</div>
+                <div class="stat-unit">BNB · Agent allocation</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Active Positions</div>
-                <div class="stat-value" id="activePositions">0</div>
-                <div class="stat-unit">Live count</div>
+                <div class="stat-label">Average APY</div>
+                <div class="stat-value" id="avgApy">0.0</div>
+                <div class="stat-unit">% · Weighted average</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Network</div>
                 <div class="stat-value" id="networkStatus">OFFLINE</div>
                 <div class="stat-unit">BSC Mainnet</div>
+                <a href="https://bscscan.com/address/0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49" target="_blank" class="explorer-link">
+                    View Vault on BscScan →
+                </a>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Active Positions</h2>
+                <h2 class="card-title">Agent Positions</h2>
                 <div class="network-status">
                     <div class="loading"></div>
                     Auto-refreshing
                 </div>
+            </div>
+            <div style="margin-bottom: 16px; padding: 12px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; border: 1px solid var(--accent2);">
+                <p style="font-size: 14px; color: var(--accent2);">
+                    Note: These are simulated positions tracked by the AI agent. In demo mode, no actual on-chain transactions are executed to save gas costs.
+                </p>
             </div>
             <table>
                 <thead>
@@ -479,52 +500,16 @@
             <div class="card-header">
                 <h2 class="card-title">Quick Actions</h2>
             </div>
-            <div style="display: flex; gap: 12px;">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                 <button onclick="refreshData()">Refresh Data</button>
-                <button onclick="openDepositModal()">Deposit BNB</button>
-                <button onclick="openWithdrawModal()">Emergency Withdraw</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Deposit BNB to Vault</h3>
-                <p style="color: var(--text-secondary); font-size: 14px;">Fund the vault for autonomous yield farming</p>
-            </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <label>Amount (BNB)</label>
-                    <input type="number" id="depositAmount" placeholder="0.01" step="0.001" min="0.001">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeDepositModal()">Cancel</button>
-                <button onclick="confirmDeposit()">Confirm Deposit</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Emergency Withdraw</h3>
-                <p style="color: var(--error); font-size: 14px;">This will withdraw all funds from the vault</p>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 16px;">Are you sure you want to perform an emergency withdrawal? This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeWithdrawModal()">Cancel</button>
-                <button style="background: var(--error);" onclick="confirmWithdraw()">Confirm Withdraw</button>
+                <button onclick="window.open('https://bscscan.com/address/' + (userAddress || '0x0'), '_blank')">View Wallet on BscScan</button>
             </div>
         </div>
     </div>
 
     <footer>
         <p>YieldHarvest - Autonomous AI Yield Farming · Built on BSC</p>
-        <p style="margin-top: 8px; font-size: 12px;">Live blockchain data · Auto-refreshes every 30 seconds</p>
+        <p style="margin-top: 8px; font-size: 12px;">Demo mode - Simulated positions · Auto-refreshes every 30 seconds</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -533,39 +518,18 @@
         let provider = null;
         let signer = null;
         let userAddress = null;
-        let vaultContract = null;
-        let sessionContract = null;
 
         // DOM elements
         const connectBtn = document.getElementById('connectBtn');
         const disconnectBtn = document.getElementById('disconnectBtn');
         const sessionKeyStatus = document.getElementById('sessionKeyStatus');
-        const vaultBalance = document.getElementById('vaultBalance');
-        const totalDeposited = document.getElementById('totalDeposited');
-        const yieldEarned = document.getElementById('yieldEarned');
-        const activePositions = document.getElementById('activePositions');
+        const walletBalance = document.getElementById('walletBalance');
+        const agentPositions = document.getElementById('agentPositions');
+        const totalValue = document.getElementById('totalValue');
+        const avgApy = document.getElementById('avgApy');
         const networkStatus = document.getElementById('networkStatus');
         const positionsTableBody = document.getElementById('positionsTableBody');
         const messageArea = document.getElementById('messageArea');
-
-        // Contract addresses
-        const VAULT_ADDRESS = '0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49';
-        const SESSION_ADDRESS = '0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B';
-
-        // Contract ABIs (minimal)
-        const VAULT_ABI = [
-            "function owner() view returns (address)",
-            "function getTotalTVL() view returns (uint256)",
-            "function getPerformanceMetrics() view returns (uint256, uint256, uint256, uint256, uint256)",
-            "function getPositionCount() view returns (uint256)",
-            "function positions(uint256) view returns (address, address, uint256, uint256, uint256, uint256)",
-            "function emergencyWithdraw() external"
-        ];
-
-        const SESSION_ABI = [
-            "function sessionKeys(address) view returns (address, uint256, uint256, uint256, bool, string)",
-            "function isValidSessionKey(address) view returns (bool)"
-        ];
 
         // Connect wallet
         connectBtn.addEventListener('click', async () => {
@@ -582,9 +546,6 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 userAddress = accounts[0];
-
-                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
-                sessionContract = new ethers.Contract(SESSION_ADDRESS, SESSION_ABI, provider);
 
                 connectBtn.style.display = 'none';
                 disconnectBtn.style.display = 'inline-block';
@@ -605,14 +566,13 @@
             provider = null;
             signer = null;
             userAddress = null;
-            vaultContract = null;
-            sessionContract = null;
 
             connectBtn.style.display = 'inline-block';
             disconnectBtn.style.display = 'none';
 
             showMessage('Wallet disconnected', 'info');
-            loadAllData();
+            sessionKeyStatus.textContent = 'DISCONNECTED';
+            networkStatus.textContent = 'OFFLINE';
         });
 
         // Load all data
@@ -623,57 +583,43 @@
             }
 
             try {
-                // NEW: Fetch from local API instead of contract
-                const response = await fetch('http://localhost:3001/api/stats');
-                const stats = await response.json();
-                
-                // Update dashboard with API data
-                vaultBalance.textContent = stats.total_active.toFixed(4);
-                totalDeposited.textContent = stats.total_deposited.toFixed(4);
-                yieldEarned.textContent = stats.yield_earned.toFixed(4);
-                activePositions.textContent = stats.active_positions;
+                // Get wallet balance
+                const balance = await provider.getBalance(userAddress);
+                walletBalance.textContent = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+
                 networkStatus.textContent = 'ONLINE';
-                
-                // Load positions table
-                await loadPositionsFromAPI(stats.positions);
-                
-                // Load session key status
-                await loadSessionKeyStatus();
-                
-                return; // Skip contract calls below
-            } catch (e) {
-                console.log("API not available, falling back to contract");
-            }
+                sessionKeyStatus.textContent = 'CONNECTED';
 
-            try {
-                // Get vault balance
-                const balance = await provider.getBalance(VAULT_ADDRESS);
-                vaultBalance.textContent = ethers.utils.formatEther(balance);
-
-                // Get performance metrics
-                const metrics = await vaultContract.getPerformanceMetrics();
-                totalDeposited.textContent = ethers.utils.formatEther(metrics[0]);
-                yieldEarned.textContent = ethers.utils.formatEther(metrics[2]);
-
-                // Get position count
-                const count = await vaultContract.getPositionCount();
-                let activeCount = 0;
-                
-                for (let i = 0; i < count; i++) {
-                    const pos = await vaultContract.positions(i);
-                    if (pos[2].gt(0)) activeCount++;
-                }
-                
-                activePositions.textContent = activeCount;
-                networkStatus.textContent = 'ONLINE';
-
-                await loadPositions();
-                await loadSessionKeyStatus();
+                // Load agent positions from API
+                await loadAgentPositions();
 
             } catch (error) {
                 console.error('Error loading data:', error);
                 networkStatus.textContent = 'ERROR';
                 showMessage('Error loading data: ' + error.message, 'error');
+            }
+        }
+
+        // Load agent positions from API
+        async function loadAgentPositions() {
+            try {
+                const response = await fetch('https://yieldharvest-agent-production.up.railway.app//api/stats');
+                const stats = await response.json();
+                
+                // Update stats
+                agentPositions.textContent = stats.active_positions;
+                totalValue.textContent = stats.total_active.toFixed(4);
+                avgApy.textContent = stats.average_apy.toFixed(2);
+                
+                // Load positions table
+                await loadPositionsFromAPI(stats.positions);
+                
+            } catch (e) {
+                console.log("API not available:", e);
+                positionsTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5">Agent API offline - Start api-server.py to see positions</td></tr>';
+                agentPositions.textContent = '0';
+                totalValue.textContent = '0.0000';
+                avgApy.textContent = '0.0';
             }
         }
 
@@ -683,7 +629,7 @@
             tbody.innerHTML = '';
             
             if (!positions || positions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5">No active positions</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5">No active positions - Agent is scanning for opportunities</td></tr>';
                 return;
             }
             
@@ -701,7 +647,7 @@
                     <td>${tokenName}</td>
                     <td>${pos.amount.toFixed(4)} BNB</td>
                     <td>${pos.entry_apy.toFixed(2)}%</td>
-                    <td><span class="status-badge status-active">Active</span></td>
+                    <td><span class="status-badge status-active">Tracked</span></td>
                 `;
                 
                 tbody.appendChild(row);
@@ -717,136 +663,6 @@
                 '0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B': 'vBTC'
             };
             return tokens[address] || address.slice(0, 8) + '...';
-        }
-
-        // Load positions from contract
-        async function loadPositions() {
-            if (!vaultContract) return;
-
-            try {
-                const count = await vaultContract.getPositionCount();
-                const tbody = document.getElementById('positionsTableBody');
-                tbody.innerHTML = '';
-
-                if (count.eq(0)) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5">No positions yet</td></tr>';
-                    return;
-                }
-
-                for (let i = 0; i < count; i++) {
-                    const pos = await vaultContract.positions(i);
-                    
-                    if (pos[2].eq(0)) continue; // Skip closed positions
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>#${i}</td>
-                        <td>${pos[0].slice(0, 8)}...</td>
-                        <td>${pos[1].slice(0, 8)}...</td>
-                        <td>${ethers.utils.formatEther(pos[2])} BNB</td>
-                        <td>${(pos[4] / 100).toFixed(2)}%</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                    `;
-                    tbody.appendChild(row);
-                }
-
-            } catch (error) {
-                console.error('Error loading positions:', error);
-            }
-        }
-
-        // Load session key status
-        async function loadSessionKeyStatus() {
-            if (!sessionContract || !userAddress) {
-                sessionKeyStatus.textContent = 'NO WALLET';
-                return;
-            }
-
-            try {
-                const isValid = await sessionContract.isValidSessionKey(userAddress);
-                const sessionKey = await sessionContract.sessionKeys(userAddress);
-                
-                // Check if address is vault owner
-                let isOwner = false;
-                try {
-                    const vaultOwner = await vaultContract.owner();
-                    isOwner = vaultOwner.toLowerCase() === userAddress.toLowerCase();
-                } catch (e) {
-                    console.log("Could not check owner:", e);
-                }
-
-                if (isValid && sessionKey.isActive) {
-                    sessionKeyStatus.textContent = 'ACTIVE';
-                } else if (isOwner) {
-                    sessionKeyStatus.textContent = 'OWNER ACCESS';
-                } else {
-                    sessionKeyStatus.textContent = 'NO ACCESS';
-                }
-
-            } catch (error) {
-                console.error('Error checking session key:', error);
-                sessionKeyStatus.textContent = 'ERROR';
-            }
-        }
-
-        // Modal functions
-        function openDepositModal() {
-            document.getElementById('depositModal').style.display = 'flex';
-        }
-
-        function closeDepositModal() {
-            document.getElementById('depositModal').style.display = 'none';
-        }
-
-        function openWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'flex';
-        }
-
-        function closeWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'none';
-        }
-
-        async function confirmDeposit() {
-            const amount = document.getElementById('depositAmount').value;
-            
-            if (!amount || amount <= 0) {
-                showMessage('Please enter a valid amount', 'error');
-                return;
-            }
-
-            try {
-                const tx = await signer.sendTransaction({
-                    to: VAULT_ADDRESS,
-                    value: ethers.utils.parseEther(amount)
-                });
-
-                showMessage('Transaction sent! Waiting for confirmation...', 'info');
-                await tx.wait();
-                showMessage('Deposit successful!', 'success');
-                
-                closeDepositModal();
-                await loadAllData();
-
-            } catch (error) {
-                console.error('Deposit error:', error);
-                showMessage('Deposit failed: ' + error.message, 'error');
-            }
-        }
-
-        async function confirmWithdraw() {
-            try {
-                const tx = await vaultContract.emergencyWithdraw();
-                showMessage('Transaction sent! Waiting for confirmation...', 'info');
-                await tx.wait();
-                showMessage('Withdrawal successful!', 'success');
-                
-                closeWithdrawModal();
-                await loadAllData();
-
-            } catch (error) {
-                console.error('Withdraw error:', error);
-                showMessage('Withdrawal failed: ' + error.message, 'error');
-            }
         }
 
         function refreshData() {
@@ -874,8 +690,27 @@
             setInterval(loadAllData, 30000); // Refresh every 30 seconds
         }
 
-        // Initial load
-        loadAllData();
+        // Initial load (check if wallet already connected)
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        userAddress = accounts[0];
+                        
+                        connectBtn.style.display = 'none';
+                        disconnectBtn.style.display = 'inline-block';
+                        
+                        await loadAllData();
+                        startAutoRefresh();
+                    }
+                } catch (error) {
+                    console.error('Auto-connect failed:', error);
+                }
+            }
+        });
     </script>
 </body>
 </html>
