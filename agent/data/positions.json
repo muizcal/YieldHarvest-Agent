@@ -32,7 +32,40 @@
       "entry_timestamp": 1771502609,
       "reason": "Initial allocation: vETH offers 6.50% APY with risk score 1.0/10",
       "status": "open"
+    },
+    {
+      "id": 3,
+      "protocol": "0xfD36E2c2a6789Db23113685031d7F16329158384",
+      "token": "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
+      "amount": 0.001,
+      "entry_apy": 8.5,
+      "risk_score": 1.0,
+      "entry_timestamp": 1771510353,
+      "reason": "Initial allocation: vBNB offers 8.50% APY with risk score 1.0/10",
+      "status": "open"
+    },
+    {
+      "id": 4,
+      "protocol": "0xfD36E2c2a6789Db23113685031d7F16329158384",
+      "token": "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
+      "amount": 0.001,
+      "entry_apy": 7.1,
+      "risk_score": 1.0,
+      "entry_timestamp": 1771510353,
+      "reason": "Initial allocation: vUSDC offers 7.10% APY with risk score 1.0/10",
+      "status": "open"
+    },
+    {
+      "id": 5,
+      "protocol": "0xfD36E2c2a6789Db23113685031d7F16329158384",
+      "token": "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
+      "amount": 0.001,
+      "entry_apy": 6.5,
+      "risk_score": 1.0,
+      "entry_timestamp": 1771510354,
+      "reason": "Initial allocation: vETH offers 6.50% APY with risk score 1.0/10",
+      "status": "open"
     }
   ],
-  "next_id": 3
+  "next_id": 6
 }
