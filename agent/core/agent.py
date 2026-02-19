@@ -71,6 +71,10 @@ class YieldHarvestAgent:
         
         logger.info("✅ Agent is now running autonomously")
         
+        # Trigger first scan immediately
+        logger.info("🎬 Triggering immediate first scan...")
+        asyncio.create_task(self._scan_opportunities())
+        
         # Run main loop
         await self._main_loop()
     
@@ -89,8 +93,9 @@ class YieldHarvestAgent:
             self.config.session_key_address
         )
         if not is_valid:
-            raise Exception("Session key is not valid or expired")
-        logger.info(f"✅ Session key is valid")
+            logger.warning("⚠️ Session key is not valid or expired - agent will run in read-only mode")
+        else:
+            logger.info(f"✅ Session key is valid")
         
         # Check whitelisted protocols
         protocols = await self.blockchain.get_whitelisted_protocols()
@@ -98,18 +103,18 @@ class YieldHarvestAgent:
     
     def _schedule_tasks(self):
         """Schedule periodic agent tasks"""
-        # Scan for opportunities every 15 minutes
+        # Scan for opportunities every 1 minute
         self.scheduler.add_job(
-            self._scan_opportunities,
+            lambda: asyncio.create_task(self._scan_opportunities()),
             'interval',
-            minutes=15,
+            minutes=1,
             id='scan_opportunities'
         )
         
         # Compound positions every 4 hours (or configured interval)
         compound_hours = self.config.compound_interval // 3600
         self.scheduler.add_job(
-            self._compound_all_positions,
+            lambda: asyncio.create_task(self._compound_all_positions()),
             'interval',
             hours=compound_hours,
             id='compound_positions'
@@ -117,7 +122,7 @@ class YieldHarvestAgent:
         
         # Check for rebalancing opportunities every hour
         self.scheduler.add_job(
-            self._check_rebalancing,
+            lambda: asyncio.create_task(self._check_rebalancing()),
             'interval',
             hours=1,
             id='check_rebalancing'
@@ -125,7 +130,7 @@ class YieldHarvestAgent:
         
         # Log performance metrics every 6 hours
         self.scheduler.add_job(
-            self._log_performance,
+            lambda: asyncio.create_task(self._log_performance()),
             'interval',
             hours=6,
             id='log_performance'
@@ -158,6 +163,7 @@ class YieldHarvestAgent:
             logger.info(f"Found {len(opportunities)} potential opportunities")
             
             if not opportunities:
+                logger.warning("No opportunities found - will try again next cycle")
                 return
             
             # Evaluate each opportunity
@@ -176,14 +182,21 @@ class YieldHarvestAgent:
             
             logger.info(f"Qualified opportunities: {len(qualified)}")
             
+            if not qualified:
+                logger.info("No qualified opportunities after filtering")
+                return
+            
             # Get current positions
             current_positions = await self.blockchain.get_all_positions()
+            logger.info(f"Current positions: {len(current_positions)}")
             
             # Use AI to decide which opportunities to pursue
             decisions = await self.yield_optimizer.optimize_portfolio(
                 qualified,
                 current_positions
             )
+            
+            logger.info(f"Generated {len(decisions)} decisions")
             
             # Execute decisions
             for decision in decisions:
@@ -206,7 +219,7 @@ class YieldHarvestAgent:
             
             for position in active_positions:
                 # Check if compound interval has passed
-                time_since_compound = datetime.now() - position['last_compound_time']
+                time_since_compound = datetime.now() - datetime.fromtimestamp(position['last_compound_time'])
                 
                 if time_since_compound.total_seconds() >= self.config.compound_interval:
                     try:

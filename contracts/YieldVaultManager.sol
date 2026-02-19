@@ -109,11 +109,11 @@ contract YieldVaultManager is Ownable, ReentrancyGuard, Pausable {
     // ============ Modifiers ============
     
     modifier onlyAuthorized() {
-        if (!sessionKeyManager.isValidSessionKey(msg.sender)) {
-            revert UnauthorizedSessionKey();
-        }
-        _;
+    if (msg.sender != owner() && !sessionKeyManager.isValidSessionKey(msg.sender)) {
+        revert UnauthorizedSessionKey();
     }
+    _;
+}
     
     // ============ Core Functions ============
     
