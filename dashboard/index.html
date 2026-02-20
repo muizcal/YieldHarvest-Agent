@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YieldHarvest - Autonomous AI Yield Farming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #131829;
+            --bg-card: #1a1f35;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0b5;
+            --accent1: #00ff88;
+            --accent2: #00d4ff;
+            --border: #2d3348;
+            --error: #ff4d6a;
+            --warning: #ffb84d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .session-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent1);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: var(--bg-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--error);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent1);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .explorer-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: var(--accent2);
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.2s;
+        }
+
+        .explorer-link:hover {
+            color: var(--accent1);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .network-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--accent1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-live {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent1);
+        }
+
+        .status-active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent1);
+            color: var(--accent1);
+        }
+
+        .message.error {
+            background: rgba(255, 77, 106, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .message.info {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--accent2);
+            color: var(--accent2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent1);
+        }
+
+        .balance-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent1);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">YH</div>
+                <div class="logo-text">
+                    <h1>YieldHarvest</h1>
+                    <p>Autonomous AI Yield Farming on BSC</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="session-status">
+                    <div class="status-indicator"></div>
+                    <span id="sessionKeyStatus">CHECKING...</span>
+                </div>
+                <button id="connectBtn">Connect Wallet</button>
+                <button id="disconnectBtn" style="display:none;">Disconnect</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="messageArea"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Your Wallet Balance</div>
+                <div class="stat-value" id="walletBalance">0.0000</div>
+                <div class="stat-unit">BNB · Live from blockchain</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Vault Balance</div>
+                <div class="stat-value" id="vaultBalance">0.0000</div>
+                <div class="stat-unit">BNB · Contract balance</div>
+                <a href="https://bscscan.com/address/0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49" target="_blank" class="explorer-link">
+                    View Vault on BscScan →
+                </a>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Agent Status</div>
+                <div class="stat-value" id="agentStatus">CHECKING</div>
+                <div class="stat-unit">Backend service</div>
+                <a href="https://yieldharvest-agent-production.up.railway.app/api/stats" target="_blank" class="explorer-link">
+                    View API →
+                </a>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Network</div>
+                <div class="stat-value" id="networkStatus">OFFLINE</div>
+                <div class="stat-unit">BSC Mainnet</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">AI Agent Activity</h2>
+                <div class="network-status">
+                    <div class="loading"></div>
+                    Live monitoring
+                </div>
+            </div>
+            <div style="margin-bottom: 16px; padding: 12px; background: rgba(0, 255, 136, 0.1); border-radius: 8px; border: 1px solid var(--accent1);">
+                <p style="font-size: 14px; color: var(--accent1);">
+                    Real-time data from blockchain and agent backend. All balances are verified on-chain.
+                </p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="metricsTableBody">
+                    <tr>
+                        <td>Vault Contract Balance</td>
+                        <td id="metricVault">--</td>
+                        <td>BSC Blockchain</td>
+                        <td><span class="status-badge status-live">Live</span></td>
+                    </tr>
+                    <tr>
+                        <td>Agent Backend Status</td>
+                        <td id="metricAgent">--</td>
+                        <td>Railway API</td>
+                        <td><span class="status-badge status-live">Live</span></td>
+                    </tr>
+                    <tr>
+                        <td>Opportunities Scanned</td>
+                        <td id="metricOpps">--</td>
+                        <td>DeFiLlama</td>
+                        <td><span class="status-badge status-live">Live</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Active Yield Positions</h2>
+                <div class="network-status">
+                    <div class="loading"></div>
+                    Agent managed
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Protocol</th>
+                        <th>Token</th>
+                        <th>Amount</th>
+                        <th>APY</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="positionsTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align:center;opacity:0.5">Loading positions...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vault Actions</h2>
+            </div>
+            <div class="action-buttons">
+                <button onclick="openDepositModal()" id="depositBtn">
+                    Deposit to Vault
+                </button>
+                <button onclick="openWithdrawModal()" class="btn-danger" id="withdrawBtn">
+                    Emergency Withdraw
+                </button>
+                <button onclick="refreshData()" class="btn-secondary">
+                    Refresh Data
+                </button>
+                <button onclick="window.open('https://bscscan.com/address/' + (userAddress || '0x0'), '_blank')" class="btn-secondary">
+                    View on BscScan
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Smart Contracts</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Vault Manager</p>
+                    <a href="https://bscscan.com/address/0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49" target="_blank" style="color: var(--accent2); text-decoration: none; font-size: 14px;">
+                        0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49
+                    </a>
+                </div>
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Session Key Manager</p>
+                    <a href="https://bscscan.com/address/0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B" target="_blank" style="color: var(--accent2); text-decoration: none; font-size: 14px;">
+                        0x24988f6313cFA0c76aAA930Fbe81b6dd3f871F5B
+                    </a>
+                </div>
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Decision Logger</p>
+                    <a href="https://bscscan.com/address/0xe82347f28365333b6f6901E7b40c17099D556007" target="_blank" style="color: var(--accent2); text-decoration: none; font-size: 14px;">
+                        0xe82347f28365333b6f6901E7b40c17099D556007
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Deposit BNB to Vault</h3>
+                <p style="color: var(--text-secondary); font-size: 14px;">Fund the vault for autonomous yield farming</p>
+            </div>
+            <div class="modal-body">
+                <div class="balance-info">
+                    <span style="color: var(--text-secondary);">Your Balance:</span>
+                    <span id="modalWalletBalance">0.0000 BNB</span>
+                </div>
+                <div class="input-group">
+                    <label>Amount (BNB)</label>
+                    <input type="number" id="depositAmount" placeholder="0.01" step="0.001" min="0.001">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDepositModal()">Cancel</button>
+                <button onclick="confirmDeposit()">Confirm Deposit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Emergency Withdraw</h3>
+                <p style="color: var(--error); font-size: 14px;">This will withdraw all funds from the vault</p>
+            </div>
+            <div class="modal-body">
+                <div class="balance-info">
+                    <span style="color: var(--text-secondary);">Vault Balance:</span>
+                    <span id="modalVaultBalance">0.0000 BNB</span>
+                </div>
+                <p style="margin-bottom: 16px;">Are you sure you want to perform an emergency withdrawal? This will withdraw all BNB from the vault contract to your wallet.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeWithdrawModal()">Cancel</button>
+                <button class="btn-danger" onclick="confirmWithdraw()">Confirm Withdraw</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>YieldHarvest - Autonomous AI Yield Farming · Built on BSC</p>
+        <p style="margin-top: 8px; font-size: 12px;">Live blockchain data · Verified on BscScan · Auto-refreshes every 30 seconds</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        let provider = null;
+        let signer = null;
+        let userAddress = null;
+        let vaultContract = null;
+
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const sessionKeyStatus = document.getElementById('sessionKeyStatus');
+        const walletBalance = document.getElementById('walletBalance');
+        const vaultBalance = document.getElementById('vaultBalance');
+        const agentStatus = document.getElementById('agentStatus');
+        const networkStatus = document.getElementById('networkStatus');
+        const messageArea = document.getElementById('messageArea');
+
+        const VAULT_ADDRESS = '0x2bd1c8a9638391974d2940Ffbb0f53778d54bA49';
+        const VAULT_ABI = [
+            "function owner() view returns (address)",
+            "function emergencyWithdraw() external"
+        ];
+
+        connectBtn.addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    showMessage('Please install MetaMask!', 'error');
+                    return;
+                }
+
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAddress = accounts[0];
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+
+                connectBtn.style.display = 'none';
+                disconnectBtn.style.display = 'inline-block';
+
+                showMessage('Wallet connected successfully!', 'success');
+                
+                await loadAllData();
+                startAutoRefresh();
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                showMessage('Failed to connect wallet: ' + error.message, 'error');
+            }
+        });
+
+        disconnectBtn.addEventListener('click', () => {
+            provider = null;
+            signer = null;
+            userAddress = null;
+            vaultContract = null;
+
+            connectBtn.style.display = 'inline-block';
+            disconnectBtn.style.display = 'none';
+
+            showMessage('Wallet disconnected', 'info');
+            sessionKeyStatus.textContent = 'DISCONNECTED';
+            networkStatus.textContent = 'OFFLINE';
+        });
+
+        async function loadAllData() {
+            if (!provider) {
+                networkStatus.textContent = 'WALLET NOT CONNECTED';
+                return;
+            }
+
+            try {
+                const balance = await provider.getBalance(userAddress);
+                const balanceFormatted = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+                walletBalance.textContent = balanceFormatted;
+
+                const vBalance = await provider.getBalance(VAULT_ADDRESS);
+                const vBalanceFormatted = parseFloat(ethers.utils.formatEther(vBalance)).toFixed(4);
+                vaultBalance.textContent = vBalanceFormatted;
+                document.getElementById('metricVault').textContent = vBalanceFormatted + ' BNB';
+
+                networkStatus.textContent = 'ONLINE';
+                sessionKeyStatus.textContent = 'CONNECTED';
+
+                await checkAgentStatus();
+                await loadPositions();
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                networkStatus.textContent = 'ERROR';
+                showMessage('Error loading data: ' + error.message, 'error');
+            }
+        }
+
+        async function checkAgentStatus() {
+            try {
+                const response = await fetch('https://yieldharvest-agent-production.up.railway.app/api/stats');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    agentStatus.textContent = 'ONLINE';
+                    document.getElementById('metricAgent').textContent = 'Running';
+                    document.getElementById('metricOpps').textContent = data.active_positions > 0 ? 
+                        data.active_positions + ' Active' : 'Scanning';
+                } else {
+                    agentStatus.textContent = 'OFFLINE';
+                    document.getElementById('metricAgent').textContent = 'Offline';
+                    document.getElementById('metricOpps').textContent = '--';
+                }
+            } catch (e) {
+                agentStatus.textContent = 'OFFLINE';
+                document.getElementById('metricAgent').textContent = 'Offline';
+                document.getElementById('metricOpps').textContent = '--';
+            }
+        }
+
+        async function loadPositions() {
+            try {
+                const response = await fetch('https://yieldharvest-agent-production.up.railway.app/api/stats');
+                
+                if (!response.ok) throw new Error('API offline');
+
+                const data = await response.json();
+                const tbody = document.getElementById('positionsTableBody');
+                tbody.innerHTML = '';
+
+                if (!data.positions || data.positions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5">No active positions yet - Agent will open positions when vault is funded</td></tr>';
+                    return;
+                }
+
+                data.positions.forEach(pos => {
+                    const row = document.createElement('tr');
+                    
+                    const protocol = pos.protocol === '0xfD36E2c2a6789Db23113685031d7F16329158384' ? 'Venus' : 
+                                     pos.protocol === '0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652' ? 'PancakeSwap' : 'Thena';
+                    
+                    const tokenName = getTokenName(pos.token);
+                    
+                    row.innerHTML = `
+                        <td>#${pos.id}</td>
+                        <td>${protocol}</td>
+                        <td>${tokenName}</td>
+                        <td>${pos.amount.toFixed(4)} BNB</td>
+                        <td style="color: var(--accent1); font-weight: 600;">${pos.entry_apy.toFixed(2)}%</td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+
+            } catch (e) {
+                console.log('Failed to load positions:', e);
+                document.getElementById('positionsTableBody').innerHTML = 
+                    '<tr><td colspan="6" style="text-align:center;opacity:0.5">Agent API offline - positions unavailable</td></tr>';
+            }
+        }
+
+        function getTokenName(address) {
+            const tokens = {
+                '0xA07c5b74C9B40447a954e1466938b865b6BBea36': 'vBNB',
+                '0xfD5840Cd36d94D7229439859C0112a4185BC0255': 'vUSDC',
+                '0xf508fCD89b8bd15579dc79A6827cB4686A3592c8': 'vETH',
+                '0x95c78222B3D6e262426483D42CfA53685A67Ab9D': 'vBUSD',
+                '0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B': 'vBTC'
+            };
+            return tokens[address] || address.slice(0, 8) + '...';
+        }
+
+        function openDepositModal() {
+            if (!provider) {
+                showMessage('Please connect your wallet first', 'error');
+                return;
+            }
+            document.getElementById('modalWalletBalance').textContent = walletBalance.textContent + ' BNB';
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('depositAmount').value = '';
+        }
+
+        function openWithdrawModal() {
+            if (!provider) {
+                showMessage('Please connect your wallet first', 'error');
+                return;
+            }
+            document.getElementById('modalVaultBalance').textContent = vaultBalance.textContent + ' BNB';
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        async function confirmDeposit() {
+            const amount = document.getElementById('depositAmount').value;
+            
+            if (!amount || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Sending transaction...', 'info');
+                
+                const tx = await signer.sendTransaction({
+                    to: VAULT_ADDRESS,
+                    value: ethers.utils.parseEther(amount)
+                });
+
+                showMessage('Transaction sent! Waiting for confirmation...', 'info');
+                await tx.wait();
+                
+                showMessage('Deposit successful! Agent will scan for opportunities shortly...', 'success');
+                
+                closeDepositModal();
+                await loadAllData();
+
+            } catch (error) {
+                console.error('Deposit error:', error);
+                showMessage('Deposit failed: ' + error.message, 'error');
+            }
+        }
+
+        async function confirmWithdraw() {
+            try {
+                showMessage('Sending transaction...', 'info');
+                
+                const tx = await vaultContract.emergencyWithdraw();
+                
+                showMessage('Transaction sent! Waiting for confirmation...', 'info');
+                await tx.wait();
+                
+                showMessage('Withdrawal successful!', 'success');
+                
+                closeWithdrawModal();
+                await loadAllData();
+
+            } catch (error) {
+                console.error('Withdraw error:', error);
+                showMessage('Withdrawal failed: ' + error.message, 'error');
+            }
+        }
+
+        function refreshData() {
+            loadAllData();
+            showMessage('Data refreshed from blockchain!', 'info');
+        }
+
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            msg.style.display = 'block';
+            
+            messageArea.innerHTML = '';
+            messageArea.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 5000);
+        }
+
+        function startAutoRefresh() {
+            setInterval(loadAllData, 30000);
+        }
+
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        userAddress = accounts[0];
+                        vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                        
+                        connectBtn.style.display = 'none';
+                        disconnectBtn.style.display = 'inline-block';
+                        
+                        await loadAllData();
+                        startAutoRefresh();
+                    }
+                } catch (error) {
+                    console.error('Auto-connect failed:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
